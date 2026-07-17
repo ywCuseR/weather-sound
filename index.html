@@ -52,7 +52,7 @@
             top: 20px;
             right: 20px;
             background: rgba(0, 0, 0, 0.6);
-            padding: 15px;
+            padding: 20px;
             border-radius: 16px;
             backdrop-filter: blur(8px);
             pointer-events: auto;
@@ -63,25 +63,25 @@
         }
 
         .achievement-panel h2 {
-            margin: 0 0 10px 0;
-            font-size: 1.1rem;
+            margin: 0 0 15px 0;
+            font-size: 1.3rem;
             letter-spacing: 1px;
             color: #ffca28;
         }
 
         .achievements {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             justify-content: center;
         }
 
         .ach-icon {
-            width: 70px;
-            height: 70px;
-            border-radius: 8px;
+            width: 79px;
+            height: 100px;
+            border-radius: 14px;
             background-size: cover;
             background-position: center;
-            border: 2px solid transparent;
+            /* border: 2px solid transparent; */
             transition: all 0.5s ease;
             filter: grayscale(100%) opacity(0.4);
         }
@@ -95,9 +95,9 @@
         /* 卡牌/積木樣式 */
         .block {
             position: absolute;
-            width: 160px;
-            height: 160px;
-            border-radius: 20px;
+            width: 170px;
+            height: 213px;
+            border-radius: 30px;
             cursor: grab;
             display: flex;
             justify-content: center;
@@ -106,8 +106,8 @@
             pointer-events: auto;
             transform: translate(-50%, -50%);
             transition: transform 0.1s ease, box-shadow 0.2s ease, opacity 0.5s ease;
-            border: 3px solid rgba(255, 255, 255, 0.6);
-            background-size: cover;
+            /* border: 3px solid rgba(255, 255, 255, 0.6); */
+            /* background-size: cover; */
             background-position: center;
             background-color: #333;
         }
@@ -268,41 +268,41 @@
         <div class="achievement-panel">
             <h2>天氣現象</h2>
             <div class="achievements">
-                <div class="ach-icon active" id="ach-sun" style="background-image: url('./image_file/sun.png');"
+                <div class="ach-icon active" id="ach-sun" style="background-image: url('./image_file/sun.jpg');"
                     title="太陽"></div>
-                <div class="ach-icon active" id="ach-wind" style="background-image: url('./image_file/wind.png');"
+                <div class="ach-icon active" id="ach-wind" style="background-image: url('./image_file/wind.jpg');"
                     title="風"></div>
-                <div class="ach-icon active" id="ach-water" style="background-image: url('./image_file/water.png');"
+                <div class="ach-icon active" id="ach-water" style="background-image: url('./image_file/water.jpg');"
                     title="水"></div>
-                <div class="ach-icon" id="ach-steam" style="background-image: url('./image_file/steam.png');"
+                <div class="ach-icon" id="ach-steam" style="background-image: url('./image_file/steam.jpg');"
                     title="水蒸氣"></div>
-                <div class="ach-icon" id="ach-cloud" style="background-image: url('./image_file/cloud.png');" title="雲">
+                <div class="ach-icon" id="ach-cloud" style="background-image: url('./image_file/cloud.jpg');" title="雲">
                 </div>
-                <div class="ach-icon" id="ach-rain" style="background-image: url('./image_file/rain.png');" title="雨">
+                <div class="ach-icon" id="ach-rain" style="background-image: url('./image_file/rain.jpg');" title="雨">
                 </div>
-                <div class="ach-icon" id="ach-snow" style="background-image: url('./image_file/snow.png');" title="雪">
+                <div class="ach-icon" id="ach-snow" style="background-image: url('./image_file/snow.jpg');" title="雪">
                 </div>
             </div>
         </div>
 
         <!-- 基礎卡牌 -->
-        <div class="block" id="card-sun" data-type="sun" style="background-image: url('./image_file/sun.png');"></div>
-        <div class="block" id="card-wind" data-type="wind" style="background-image: url('./image_file/wind.png');">
+        <div class="block" id="card-sun" data-type="sun" style="background-image: url('./image_file/sun.jpg');"></div>
+        <div class="block" id="card-wind" data-type="wind" style="background-image: url('./image_file/wind.jpg');">
         </div>
-        <div class="block" id="card-water" data-type="water" style="background-image: url('./image_file/water.png');">
+        <div class="block" id="card-water" data-type="water" style="background-image: url('./image_file/water.jpg');">
         </div>
 
         <!-- 衍生卡牌 (初始隱藏) -->
         <div class="block hidden" id="card-steam" data-type="steam"
-            style="background-image: url('./image_file/steam.png');"></div>
+            style="background-image: url('./image_file/steam.jpg');"></div>
         <div class="block hidden" id="card-steam2" data-type="steam"
-            style="background-image: url('./image_file/steam.png');"></div>
+            style="background-image: url('./image_file/steam.jpg');"></div>
         <div class="block hidden" id="card-cloud" data-type="cloud"
-            style="background-image: url('./image_file/cloud.png');"></div>
+            style="background-image: url('./image_file/cloud.jpg');"></div>
         <div class="block hidden" id="card-rain" data-type="rain"
-            style="background-image: url('./image_file/rain.png');"></div>
+            style="background-image: url('./image_file/rain.jpg');"></div>
         <div class="block hidden" id="card-snow" data-type="snow"
-            style="background-image: url('./image_file/snow.png');"></div>
+            style="background-image: url('./image_file/snow.jpg');"></div>
 
         <button class="btn-mute" onclick="muteAllSounds()">靜音</button>
         <button class="btn-reset" onclick="resetBlocks()">重置位置</button>
@@ -492,8 +492,8 @@
                         // 1. 太陽 + 水 = 水蒸氣 (一次產生兩張)
                         if (checkComboMatch(t1, t2, 'sun', 'water')) {
                             if (!unlocked['steam']) {
-                                unlockCard('steam', window.innerWidth / 2 - 90, window.innerHeight / 2);
-                                unlockCard('steam2', window.innerWidth / 2 + 90, window.innerHeight / 2);
+                                unlockCard('steam', 150, window.innerHeight / 2);
+                                unlockCard('steam2', 350, window.innerHeight / 2);
                                 lastInteractionTime = now;
                             } else {
                                 triggerWobble('card-steam');
@@ -511,19 +511,19 @@
                             }
                         }
 
-                        // 3 & 4. 雲 + 風 = 下雪(左) 或 下雨(右)
+                        // 3 & 4. 雲 + 風 = 下雨(中間) 或 下雪(右側)
                         else if (checkComboMatch(t1, t2, 'cloud', 'wind')) {
-                            const isLeft = midX < window.innerWidth / 2;
-                            if (isLeft) {
+                            const isRight = midX > window.innerWidth / 2;
+                            if (isRight) {
                                 if (!unlocked['snow']) {
-                                    unlockCard('snow', 200, window.innerHeight / 2);
+                                    unlockCard('snow', window.innerWidth - 200, window.innerHeight / 2);
                                     lastInteractionTime = now;
                                 } else {
                                     triggerWobble('card-snow');
                                 }
                             } else {
                                 if (!unlocked['rain']) {
-                                    unlockCard('rain', window.innerWidth - 200, window.innerHeight / 2);
+                                    unlockCard('rain', window.innerWidth / 2 + 200, window.innerHeight / 2);
                                     lastInteractionTime = now;
                                 } else {
                                     triggerWobble('card-rain');
@@ -541,11 +541,15 @@
             let bgImage = 'bg.png';
 
             if (unlocked['rain'] && unlocked['snow']) {
-                bgImage = 'bg_snow_river.png';
+                bgImage = 'bg_snow_rain.png';
             } else if (unlocked['rain']) {
-                bgImage = 'bg_river.png';
+                bgImage = 'bg_rain.png';
             } else if (unlocked['snow']) {
                 bgImage = 'bg_snow.png';
+            } else if (unlocked['cloud']) {
+                bgImage = 'bg_cloud.png';
+            } else if (unlocked['steam']) {
+                bgImage = 'bg_steam.png';
             }
 
             bgLayer.style.backgroundImage = `url('./image_file/${bgImage}')`;
@@ -557,9 +561,9 @@
             const screenHeight = window.innerHeight;
 
             const positions = {
-                'card-water': { x: screenWidth / 2 - 100, y: screenHeight - 150 }, // 中下方偏左
-                'card-sun': { x: screenWidth / 2 + 350, y: 280 },                  // 靠中間
-                'card-wind': { x: screenWidth / 2 - 350, y: 280 }                  // 靠中間
+                'card-sun': { x: 150, y: 150 },                               // 太陽在左上角
+                'card-water': { x: 150, y: screenHeight - 150 },              // 水在左下角
+                'card-wind': { x: 350, y: 150 }                               // 風在太陽旁邊(右邊)
             };
 
             for (const [id, pos] of Object.entries(positions)) {
@@ -574,28 +578,28 @@
             if (unlocked['steam']) {
                 const el1 = document.getElementById('card-steam');
                 if (el1) {
-                    el1.style.left = `${screenWidth / 2 - 90}px`;
+                    el1.style.left = `150px`; // 水蒸氣在左側(水和太陽中間)
                     el1.style.top = `${screenHeight / 2}px`;
                 }
                 const el2 = document.getElementById('card-steam2');
                 if (el2) {
-                    el2.style.left = `${screenWidth / 2 + 90}px`;
+                    el2.style.left = `350px`;
                     el2.style.top = `${screenHeight / 2}px`;
                 }
             }
             if (unlocked['cloud']) {
                 const el = document.getElementById('card-cloud');
-                el.style.left = `${screenWidth / 2}px`;
+                el.style.left = `${screenWidth / 2}px`; // 雲在中間正上方
                 el.style.top = `150px`;
             }
             if (unlocked['snow']) {
                 const el = document.getElementById('card-snow');
-                el.style.left = `${screenWidth / 2 - 450}px`;
+                el.style.left = `${screenWidth - 200}px`; // 雪在右側中間
                 el.style.top = `${screenHeight / 2}px`;
             }
             if (unlocked['rain']) {
                 const el = document.getElementById('card-rain');
-                el.style.left = `${screenWidth / 2 + 450}px`;
+                el.style.left = `${screenWidth / 2 + 200}px`; // 雨在中間稍微偏右邊
                 el.style.top = `${screenHeight / 2}px`;
             }
         }
