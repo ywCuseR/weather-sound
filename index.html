@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天氣音景積木互動</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #1a1a1a;
+        }
+
+        /* 背景圖層 */
+        #bg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('./image_file/bg.png');
+            background-size: cover;
+            background-position: center;
+            z-index: 0;
+            transition: background-image 0.8s ease-in-out;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        /* 成就面板 */
+        .achievement-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 16px;
+            backdrop-filter: blur(8px);
+            pointer-events: auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            color: white;
+            text-align: center;
+        }
+
+        .achievement-panel h2 {
+            margin: 0 0 15px 0;
+            font-size: 1.3rem;
+            letter-spacing: 1px;
+            color: #ffca28;
+        }
+
+        .achievements {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .ach-icon {
+            width: 79px;
+            height: 100px;
+            border-radius: 14px;
+            background-size: cover;
+            background-position: center;
+            /* border: 2px solid transparent; */
+            transition: all 0.5s ease;
+            filter: grayscale(100%) opacity(0.4);
+        }
+
+        .ach-icon.active {
+            filter: grayscale(0%) opacity(1);
+            border-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        /* 卡牌/積木樣式 */
+        .block {
+            position: absolute;
+            width: 170px;
+            height: 213px;
+            border-radius: 30px;
+            cursor: grab;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            pointer-events: auto;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease, box-shadow 0.2s ease, opacity 0.5s ease;
+            /* border: 3px solid rgba(255, 255, 255, 0.6); */
+            /* background-size: cover; */
+            background-position: center;
+            background-color: #333;
+        }
+
+        .block.hidden {
+            display: none !important;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .block:active {
+            cursor: grabbing;
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.6);
+            z-index: 10 !important;
+        }
+
+        .btn-reset {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: all 0.2s;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .btn-reset:hover {
+            background: white;
+            color: black;
+        }
+
+        .btn-mute {
+            position: absolute;
+            bottom: 30px;
+            right: 150px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: all 0.2s;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .btn-mute:hover {
+            background: white;
+            color: black;
+        }
+
+        /* 動畫特效 */
+        @keyframes pop {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0;
+            }
+
+            70% {
+                transform: translate(-50%, -50%) scale(1.2);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .anim-pop {
+            animation: pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes glow {
+            0% {
+                box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(255, 215, 0, 1), 0 0 80px rgba(255, 255, 255, 0.8);
+                border-color: white;
+            }
+
+            100% {
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            }
+        }
+
+        .anim-glow {
+            animation: glow 1s ease-out;
+        }
+
+        @keyframes wobble {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg) scale(1);
+            }
+
+            20% {
+                transform: translate(-50%, -50%) rotate(-10deg) scale(1.1);
+            }
+
+            40% {
+                transform: translate(-50%, -50%) rotate(10deg) scale(1.1);
+            }
+
+            60% {
+                transform: translate(-50%, -50%) rotate(-10deg) scale(1.1);
+            }
+
+            80% {
+                transform: translate(-50%, -50%) rotate(10deg) scale(1.1);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) rotate(0deg) scale(1);
+            }
+        }
+
+        .anim-wobble {
+            animation: wobble 0.6s ease-in-out;
+        }
+
+        @keyframes ach-pop {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.3);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .anim-ach-pop {
+            animation: ach-pop 0.5s ease-out;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="bg-layer"></div>
+
+    <div id="ui-layer">
+
+        <!-- 成就面板 -->
+        <div class="achievement-panel">
+            <h2>天氣現象</h2>
+            <div class="achievements">
+                <div class="ach-icon active" id="ach-sun" style="background-image: url('./image_file/sun.jpg');"
+                    title="太陽"></div>
+                <div class="ach-icon active" id="ach-wind" style="background-image: url('./image_file/wind.jpg');"
+                    title="風"></div>
+                <div class="ach-icon active" id="ach-water" style="background-image: url('./image_file/water.jpg');"
+                    title="水"></div>
+                <div class="ach-icon" id="ach-steam" style="background-image: url('./image_file/steam.jpg');"
+                    title="水蒸氣"></div>
+                <div class="ach-icon" id="ach-cloud" style="background-image: url('./image_file/cloud.jpg');" title="雲">
+                </div>
+                <div class="ach-icon" id="ach-rain" style="background-image: url('./image_file/rain.jpg');" title="雨">
+                </div>
+                <div class="ach-icon" id="ach-snow" style="background-image: url('./image_file/snow.jpg');" title="雪">
+                </div>
+            </div>
+        </div>
+
+        <!-- 基礎卡牌 -->
+        <div class="block" id="card-sun" data-type="sun" style="background-image: url('./image_file/sun.jpg');"></div>
+        <div class="block" id="card-wind" data-type="wind" style="background-image: url('./image_file/wind.jpg');">
+        </div>
+        <div class="block" id="card-water" data-type="water" style="background-image: url('./image_file/water.jpg');">
+        </div>
+
+        <!-- 衍生卡牌 (初始隱藏) -->
+        <div class="block hidden" id="card-steam" data-type="steam"
+            style="background-image: url('./image_file/steam.jpg');"></div>
+        <div class="block hidden" id="card-steam2" data-type="steam"
+            style="background-image: url('./image_file/steam.jpg');"></div>
+        <div class="block hidden" id="card-cloud" data-type="cloud"
+            style="background-image: url('./image_file/cloud.jpg');"></div>
+        <div class="block hidden" id="card-rain" data-type="rain"
+            style="background-image: url('./image_file/rain.jpg');"></div>
+        <div class="block hidden" id="card-snow" data-type="snow"
+            style="background-image: url('./image_file/snow.jpg');"></div>
+
+        <button class="btn-mute" onclick="muteAllSounds()">靜音</button>
+        <button class="btn-reset" onclick="resetBlocks()">重置位置</button>
+    </div>
+
+    <script>
+        // 音效設定
+        const sounds = {
+            'sun': new Audio('./sound_file/sun.wav'),
+            'wind': new Audio('./sound_file/wind.m4a'),
+            'water': new Audio('./sound_file/water.wav'),
+            'steam': new Audio('./sound_file/steam.m4a'),
+            'cloud': new Audio('./sound_file/cloud.m4a'),
+            'rain': new Audio('./sound_file/rain.m4a'),
+            'snow1': new Audio('./sound_file/snow_1.m4a'),
+            'snow2': new Audio('./sound_file/snow_2.m4a')
+        };
+
+        let activeDragSound = null;
+        let activeSynthSounds = [];
+        let unlocked = {
+            'sun': true, 'wind': true, 'water': true,
+            'steam': false, 'steam2': false, 'cloud': false, 'rain': false, 'snow': false
+        };
+
+        function playDragSound(type) {
+            let snd = sounds[type];
+            if (type === 'snow') {
+                snd = Math.random() > 0.5 ? sounds['snow1'] : sounds['snow2'];
+            }
+            if (snd) {
+                snd.loop = true;
+                snd.currentTime = 0;
+                snd.play().catch(e => console.log("Audio play blocked: ", e));
+                activeDragSound = snd;
+            }
+        }
+
+        function stopDragSound() {
+            if (activeDragSound) {
+                activeDragSound.pause();
+                activeDragSound = null;
+            }
+        }
+
+        function playSynthSound(type) {
+            let snd = sounds[type];
+            if (type === 'snow') {
+                snd = Math.random() > 0.5 ? sounds['snow1'] : sounds['snow2'];
+            }
+            if (snd) {
+                let synthSnd = snd.cloneNode();
+                synthSnd.loop = false;
+                synthSnd.volume = 1.0;
+                activeSynthSounds.push(synthSnd);
+                synthSnd.play().catch(e => console.log("Audio play blocked: ", e));
+                synthSnd.onended = () => {
+                    activeSynthSounds = activeSynthSounds.filter(s => s !== synthSnd);
+                };
+            }
+        }
+
+        function muteAllSounds() {
+            stopDragSound();
+            activeSynthSounds.forEach(s => {
+                s.pause();
+                s.currentTime = 0;
+            });
+            activeSynthSounds = [];
+        }
+
+        // 卡牌拖曳邏輯
+        const blocks = document.querySelectorAll('.block');
+        let draggedBlock = null;
+        let offset = { x: 0, y: 0 };
+
+        blocks.forEach(block => {
+            block.addEventListener('mousedown', startDrag);
+            block.addEventListener('touchstart', startDrag, { passive: false });
+        });
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('touchmove', drag, { passive: false });
+        document.addEventListener('mouseup', endDrag);
+        document.addEventListener('touchend', endDrag);
+
+        function startDrag(e) {
+            if (this.classList.contains('hidden')) return;
+            draggedBlock = this;
+            const clientX = e.clientX || e.touches[0].clientX;
+            const clientY = e.clientY || e.touches[0].clientY;
+            const rect = draggedBlock.getBoundingClientRect();
+            offset.x = clientX - (rect.left + rect.width / 2);
+            offset.y = clientY - (rect.top + rect.height / 2);
+            draggedBlock.style.zIndex = 5;
+
+            // 移除動畫類別，以便下次還能觸發
+            draggedBlock.classList.remove('anim-pop', 'anim-glow', 'anim-wobble');
+
+            // 播放拖曳音效
+            playDragSound(draggedBlock.dataset.type);
+        }
+
+        function drag(e) {
+            if (!draggedBlock) return;
+            e.preventDefault();
+            const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+            const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+            let x = Math.max(80, Math.min(window.innerWidth - 80, clientX - offset.x));
+            let y = Math.max(80, Math.min(window.innerHeight - 80, clientY - offset.y));
+            draggedBlock.style.left = `${x}px`;
+            draggedBlock.style.top = `${y}px`;
+
+            checkInteractions();
+        }
+
+        function endDrag() {
+            if (draggedBlock) {
+                draggedBlock.style.zIndex = 3;
+                draggedBlock = null;
+            }
+            stopDragSound();
+        }
+
+        // 碰撞與合成邏輯
+        function dist(b1, b2) {
+            if (b1.classList.contains('hidden') || b2.classList.contains('hidden')) return 9999;
+            const r1 = b1.getBoundingClientRect();
+            const r2 = b2.getBoundingClientRect();
+            const dx = (r1.left + r1.width / 2) - (r2.left + r2.width / 2);
+            const dy = (r1.top + r1.height / 2) - (r2.top + r2.height / 2);
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        function checkComboMatch(c1, c2, target1, target2) {
+            return (c1 === target1 && c2 === target2) || (c1 === target2 && c2 === target1);
+        }
+
+        function triggerWobble(cardId) {
+            const el = document.getElementById(cardId);
+            if (el && !el.classList.contains('hidden')) {
+                el.classList.remove('anim-wobble');
+                void el.offsetWidth; // trigger reflow
+                el.classList.add('anim-wobble');
+            }
+        }
+
+        function unlockCard(type, x, y) {
+            unlocked[type] = true;
+            const card = document.getElementById(`card-${type}`);
+            card.style.left = `${x}px`;
+            card.style.top = `${y}px`;
+            card.classList.remove('hidden');
+            card.classList.add('anim-pop', 'anim-glow');
+
+            // 點亮成就清單
+            const ach = document.getElementById(`ach-${type}`);
+            if (ach) {
+                ach.classList.add('active', 'anim-ach-pop');
+            }
+
+            playSynthSound(type);
+            updateBackground();
+        }
+
+        let lastInteractionTime = 0;
+
+        function checkInteractions() {
+            // 防抖，避免連續觸發多次
+            const now = Date.now();
+            if (now - lastInteractionTime < 500) return;
+
+            const threshold = 120;
+            const activeCards = Array.from(blocks).filter(b => !b.classList.contains('hidden'));
+
+            // 檢查所有兩兩組合
+            for (let i = 0; i < activeCards.length; i++) {
+                for (let j = i + 1; j < activeCards.length; j++) {
+                    const b1 = activeCards[i];
+                    const b2 = activeCards[j];
+                    const t1 = b1.dataset.type;
+                    const t2 = b2.dataset.type;
+
+                    if (dist(b1, b2) < threshold) {
+                        const midX = (b1.getBoundingClientRect().left + b2.getBoundingClientRect().left + b1.offsetWidth) / 2;
+                        const midY = (b1.getBoundingClientRect().top + b2.getBoundingClientRect().top + b1.offsetHeight) / 2;
+
+                        // 1. 太陽 + 水 = 水蒸氣 (一次產生兩張)
+                        if (checkComboMatch(t1, t2, 'sun', 'water')) {
+                            if (!unlocked['steam']) {
+                                unlockCard('steam', 150, window.innerHeight / 2);
+                                unlockCard('steam2', 350, window.innerHeight / 2);
+                                lastInteractionTime = now;
+                            } else {
+                                triggerWobble('card-steam');
+                                triggerWobble('card-steam2');
+                            }
+                        }
+
+                        // 2. 水蒸氣 + 水蒸氣 = 雲
+                        else if (checkComboMatch(t1, t2, 'steam', 'steam')) {
+                            if (!unlocked['cloud']) {
+                                unlockCard('cloud', window.innerWidth / 2, 150);
+                                lastInteractionTime = now;
+                            } else {
+                                triggerWobble('card-cloud');
+                            }
+                        }
+
+                        // 3 & 4. 雲 + 風 = 下雨(中間) 或 下雪(右側)
+                        else if (checkComboMatch(t1, t2, 'cloud', 'wind')) {
+                            const isRight = midX > window.innerWidth / 2;
+                            if (isRight) {
+                                if (!unlocked['snow']) {
+                                    unlockCard('snow', window.innerWidth - 200, window.innerHeight / 2);
+                                    lastInteractionTime = now;
+                                } else {
+                                    triggerWobble('card-snow');
+                                }
+                            } else {
+                                if (!unlocked['rain']) {
+                                    unlockCard('rain', window.innerWidth / 2 + 200, window.innerHeight / 2);
+                                    lastInteractionTime = now;
+                                } else {
+                                    triggerWobble('card-rain');
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 背景更新邏輯
+        function updateBackground() {
+            const bgLayer = document.getElementById('bg-layer');
+            let bgImage = 'bg.png';
+
+            if (unlocked['rain'] && unlocked['snow']) {
+                bgImage = 'bg_snow_rain.png';
+            } else if (unlocked['rain']) {
+                bgImage = 'bg_rain.png';
+            } else if (unlocked['snow']) {
+                bgImage = 'bg_snow.png';
+            } else if (unlocked['cloud']) {
+                bgImage = 'bg_cloud.png';
+            } else if (unlocked['steam']) {
+                bgImage = 'bg_steam.png';
+            }
+
+            bgLayer.style.backgroundImage = `url('./image_file/${bgImage}')`;
+        }
+
+        // 初始化位置
+        function resetBlocks() {
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+
+            const positions = {
+                'card-sun': { x: 150, y: 150 },                               // 太陽在左上角
+                'card-water': { x: 150, y: screenHeight - 150 },              // 水在左下角
+                'card-wind': { x: 350, y: 150 }                               // 風在太陽旁邊(右邊)
+            };
+
+            for (const [id, pos] of Object.entries(positions)) {
+                const el = document.getElementById(id);
+                if (el && !el.classList.contains('hidden')) {
+                    el.style.left = `${pos.x}px`;
+                    el.style.top = `${pos.y}px`;
+                }
+            }
+
+            // 衍生卡牌若已解鎖，也給予預設位置
+            if (unlocked['steam']) {
+                const el1 = document.getElementById('card-steam');
+                if (el1) {
+                    el1.style.left = `150px`; // 水蒸氣在左側(水和太陽中間)
+                    el1.style.top = `${screenHeight / 2}px`;
+                }
+                const el2 = document.getElementById('card-steam2');
+                if (el2) {
+                    el2.style.left = `350px`;
+                    el2.style.top = `${screenHeight / 2}px`;
+                }
+            }
+            if (unlocked['cloud']) {
+                const el = document.getElementById('card-cloud');
+                el.style.left = `${screenWidth / 2}px`; // 雲在中間正上方
+                el.style.top = `150px`;
+            }
+            if (unlocked['snow']) {
+                const el = document.getElementById('card-snow');
+                el.style.left = `${screenWidth - 200}px`; // 雪在右側中間
+                el.style.top = `${screenHeight / 2}px`;
+            }
+            if (unlocked['rain']) {
+                const el = document.getElementById('card-rain');
+                el.style.left = `${screenWidth / 2 + 200}px`; // 雨在中間稍微偏右邊
+                el.style.top = `${screenHeight / 2}px`;
+            }
+        }
+
+        window.onload = () => {
+            resetBlocks();
+            window.addEventListener('resize', resetBlocks);
+        };
+    </script>
+</body>
+
+</html>
