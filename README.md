@@ -5,6 +5,6 @@
 
 ### 資源來源
 *   **音效素材 (Audio)**：
-    *   專案內使用的所有天氣與自然音效（包含水、風、太陽、下雨、下雪等），皆來自於 [Pixabay](https://pixabay.com/) 以及 [Freesound](https://freesound.org/) 網站，採用無版權 (Royalty-Free) 授權素材。
+    *   專案內使用的所有天氣與自然音效（包含水、風、太陽、下雨、下雪等），皆來自於 [Pixabay](https://pixabay.com/) 以及 [Freesound](https://freesound.org/) 網站。
 *   **視覺素材 (Images)**：
     *   專案內使用的背景圖片（如海洋、河流、雪地等）以及所有的卡牌圖示（水、太陽、風、雲、水蒸氣、雨、雪），皆是由 Google **Gemini** 模型生成。
